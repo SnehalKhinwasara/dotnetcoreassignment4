@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CoreApp31.Models;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CoreApp31.CustomMiddlewares
 {
@@ -26,6 +28,7 @@ namespace CoreApp31.CustomMiddlewares
     public class ErrorMiddlewareLogic
     {
         private readonly RequestDelegate request;
+      //  private  VodafoneExceptionDbContext exceptiondbContext;
         /// <summary>
         /// RequestDelegate is resolved by the Host class taht is managing 
         /// all middlewares
@@ -34,9 +37,10 @@ namespace CoreApp31.CustomMiddlewares
         public ErrorMiddlewareLogic(RequestDelegate request)
         {
             this.request = request;
+            
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, VodafoneExceptionDbContext exceptiondbContext)
         {
             try
             {
@@ -45,8 +49,11 @@ namespace CoreApp31.CustomMiddlewares
             }
             catch (Exception ex)
             {
+                exceptiondbContext.ExceptionLogs.Add(new ExceptionLog { ExceptionMesaage = ex.Message, Date = DateTime.Now });
+                exceptiondbContext.SaveChanges();
                 // logic for exception handling and generating response
                 await HandleErrorAndWriteResponse(context, ex);
+              
             }
         }
 
@@ -55,7 +62,7 @@ namespace CoreApp31.CustomMiddlewares
             // set the error code
             ctx.Response.StatusCode = 500;
             // receive the error message from exception
-            string message = ex.Message;
+            string message = ex.Message;           
 
             // assign these values to ErrorInfo class
             var errorInfo = new ErrorInfo()

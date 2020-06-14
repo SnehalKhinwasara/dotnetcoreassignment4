@@ -56,12 +56,16 @@ namespace CoreApp31
                 services.AddDbContext<VodafoneWebAuthDbContext>(options =>
                     options.UseSqlServer(
                         Configuration.GetConnectionString("VodafoneWebAuthDbContextConnection")));
+            services.AddDbContext<VodafoneExceptionDbContext>(options => {
+                options.UseSqlServer(Configuration.GetConnectionString("VodafoneExceptionLogConnection"));
+            });
+
 
             //  Configure the DataStore to verify the Credentials
             //services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
             //.AddEntityFrameworkStores<VodafoneWebAuthDbContext>();
 
-            
+
             // used to resolve the UserManager<IdentityUser> and
             // RoleManager<IdentityRole>
             services.AddIdentity<IdentityUser,IdentityRole>(
@@ -76,11 +80,11 @@ namespace CoreApp31
                   options => {
                       options.AddPolicy(
                              "readpolicy", 
-                             policy => policy.RequireRole("Manager", "Clerk", "Operator") 
+                             policy => policy.RequireRole("Manager", "Clerk", "Operator", "Administrator") 
                           );
                       options.AddPolicy(
                              "writepolicy",
-                             policy => policy.RequireRole("Manager", "Clerk")
+                             policy => policy.RequireRole("Manager", "Clerk","Administrator")
                           );
 
                   }
